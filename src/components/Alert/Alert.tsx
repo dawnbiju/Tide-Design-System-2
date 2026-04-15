@@ -94,7 +94,7 @@ export const Toast = forwardRef<HTMLDivElement, AlertProps>(
   ({ className, ...props }, ref) => (
     <Alert
       ref={ref}
-      className={cn('w-[360px] shadow-modal', className)}
+      className={cn('w-full shadow-modal', className)}
       {...props}
     />
   ),
