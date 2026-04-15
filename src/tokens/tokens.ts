@@ -13,6 +13,14 @@ export const colors = {
     700: '#0C169A',
     900: '#040966',
   },
+  // ── Crimson theme palette (mirrors Figma: Tide / Primitives — color/red/*) ─
+  red: {
+    50:  '#FFF1F2',
+    100: '#FFD6DB',
+    500: '#E11D3F',
+    700: '#B8102E',
+    900: '#7B0D1E',
+  },
   neutral: {
     200: '#ECECEE',
     500: '#5F606D',
@@ -107,5 +115,42 @@ export const typography = {
   },
 } as const
 
-export const tokens = { colors, spacing, radius, shadow, typography } as const
+// ── Theme definitions ────────────────────────────────────────────────────────
+// Each theme maps the semantic token overrides applied via data-theme="<id>".
+// Mirrors Figma: Tide / Semantic — Crimson mode.
+export type ThemeId = 'default' | 'crimson'
+
+export const themes: Record<ThemeId, {
+  name: string
+  bgSubtle: string
+  bgBrand: string
+  bgBrandStrong: string
+  textPrimary: string
+  textBrand: string
+  borderSubtle: string
+  borderBrand: string
+}> = {
+  default: {
+    name:          'Default (Blue)',
+    bgSubtle:      '#EFF1FF',
+    bgBrand:       '#1929D6',
+    bgBrandStrong: '#040966',
+    textPrimary:   '#040966',
+    textBrand:     '#1929D6',
+    borderSubtle:  '#D0D5FC',
+    borderBrand:   '#1929D6',
+  },
+  crimson: {
+    name:          'Crimson (Red)',
+    bgSubtle:      '#FFF1F2',
+    bgBrand:       '#E11D3F',
+    bgBrandStrong: '#7B0D1E',
+    textPrimary:   '#7B0D1E',
+    textBrand:     '#E11D3F',
+    borderSubtle:  '#FFD6DB',
+    borderBrand:   '#E11D3F',
+  },
+}
+
+export const tokens = { colors, spacing, radius, shadow, typography, themes } as const
 export type Tokens = typeof tokens

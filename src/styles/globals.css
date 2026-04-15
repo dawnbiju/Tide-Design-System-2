@@ -82,6 +82,38 @@
   --font-body:    'Figtree', sans-serif;
 }
 
+/* ── Theme: Crimson ───────────────────────────────────────────────────────── */
+/*
+ * Applied via data-theme="crimson" on <html> or any ancestor element.
+ * Primitive palette (mirrors Figma: Tide / Primitives — color/red/*):
+ *   red/50  #FFF1F2  · red/100 #FFD6DB
+ *   red/500 #E11D3F  · red/700 #B8102E  · red/900 #7B0D1E
+ * Semantic overrides mirror Figma: Tide / Semantic — Crimson mode.
+ */
+[data-theme="crimson"] {
+  /* Primitives */
+  --tide-color-red-50:   #FFF1F2;
+  --tide-color-red-100:  #FFD6DB;
+  --tide-color-red-500:  #E11D3F;
+  --tide-color-red-700:  #B8102E;
+  --tide-color-red-900:  #7B0D1E;
+
+  /* Semantic overrides */
+  --color-bg-subtle:        #FFF1F2;   /* red/50  */
+  --color-bg-brand:         #E11D3F;   /* red/500 */
+  --color-bg-brand-strong:  #7B0D1E;   /* red/900 */
+  --color-text-primary:     #7B0D1E;   /* red/900 */
+  --color-text-brand:       #E11D3F;   /* red/500 */
+  --color-border-subtle:    #FFD6DB;   /* red/100 */
+  --color-border-brand:     #E11D3F;   /* red/500 */
+  --color-status-info-background: #FFF1F2;
+  --color-status-info-foreground: #E11D3F;
+
+  /* Shadows tinted to red */
+  --shadow-card:  0px 8px 24px 0px rgba(123, 13, 30, 0.12);
+  --shadow-modal: 0px 16px 40px 0px rgba(12, 12, 14, 0.16);
+}
+
 /* ── Base resets ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

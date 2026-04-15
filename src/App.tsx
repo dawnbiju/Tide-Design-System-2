@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import type { ThemeId } from './tokens/tokens'
 import { Button }      from './components/Button'
 import { Link }        from './components/Link'
 import { FeatureCard } from './components/FeatureCard'
@@ -50,8 +51,40 @@ function Section({
   )
 }
 
+/* ── Theme switcher pill ─────────────────────────────────────────────────── */
+function ThemeSwitcher({ theme, onChange }: { theme: ThemeId; onChange: (t: ThemeId) => void }) {
+  const themes: { id: ThemeId; label: string; dot: string }[] = [
+    { id: 'default', label: 'Default',  dot: '#1929D6' },
+    { id: 'crimson', label: 'Crimson',  dot: '#E11D3F' },
+  ]
+  return (
+    <div className="flex items-center gap-2 bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)] rounded-full px-3 py-1.5 shadow-card">
+      <span className="font-body text-body-s text-[var(--color-text-secondary)] pr-1">Theme</span>
+      {themes.map(t => (
+        <button
+          key={t.id}
+          onClick={() => onChange(t.id)}
+          className={[
+            'flex items-center gap-1.5 px-3 py-1 rounded-full font-body text-body-s transition-colors',
+            theme === t.id
+              ? 'bg-[var(--color-bg-brand)] text-[var(--color-text-inverse)]'
+              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+          ].join(' ')}
+        >
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/30"
+            style={{ background: t.dot }}
+          />
+          {t.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /* ── App ─────────────────────────────────────────────────────────────────── */
 export default function App() {
+  const [theme,         setTheme]         = useState<ThemeId>('default')
   const [modalOpen,     setModalOpen]     = useState(false)
   const [toggleState,   setToggleState]   = useState<'off' | 'on'>('off')
   const [checkboxState, setCheckboxState] = useState(false)
@@ -60,8 +93,26 @@ export default function App() {
   const [activeTab,     setActiveTab]     = useState('overview')
   const [activeSidebar, setActiveSidebar] = useState('dashboard')
 
+  // Apply theme as data-theme attribute on <html>
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'default') {
+      root.removeAttribute('data-theme')
+    } else {
+      root.setAttribute('data-theme', theme)
+    }
+  }, [theme])
+
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)]">
+
+      {/* ── Top Bar ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 sm:px-8 lg:px-16 py-3 bg-[var(--color-bg-page)] border-b border-[var(--color-border-subtle)]">
+        <span className="font-body font-semibold text-title-m text-[var(--color-text-primary)]">
+          Tide DS
+        </span>
+        <ThemeSwitcher theme={theme} onChange={setTheme} />
+      </div>
 
       {/* ── Top Banner ───────────────────────────────────────────────────── */}
       <Banner
