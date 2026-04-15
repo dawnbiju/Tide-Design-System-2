@@ -9,17 +9,21 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
   ({ label, disabled, checked, className, id: idProp, ...props }, ref) => {
     const autoId = useId()
     const id = idProp ?? autoId
-
     const isDisabled = disabled
-    const ringColor  = isDisabled
-      ? 'border-[var(--color-control-disabled-foreground)]'
-      : checked
-        ? 'border-[var(--color-bg-brand)]'
-        : 'border-[var(--color-border-subtle)]'
+
+    // Figma: filled circle with ✓ when checked; border-only ring when unchecked
+    const controlCls = cn(
+      'rounded-full shrink-0 w-5 h-5 flex items-center justify-center border transition-colors',
+      isDisabled
+        ? 'bg-[var(--color-control-disabled-background)] border-[var(--color-control-disabled-foreground)]'
+        : checked
+          ? 'bg-[var(--color-bg-brand)] border-[var(--color-bg-brand)]'
+          : 'bg-[var(--color-bg-page)] border-[var(--color-border-subtle)]',
+    )
 
     return (
       <div className={cn('flex items-start gap-3', className)}>
-        <div className="relative flex-shrink-0 mt-0.5">
+        <div className="relative flex-shrink-0">
           <input
             ref={ref}
             type="radio"
@@ -29,15 +33,11 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
             className="sr-only"
             {...props}
           />
-          <div
-            className={cn(
-              'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
-              ringColor,
-              isDisabled ? 'bg-[var(--color-control-disabled-background)]' : 'bg-[var(--color-bg-page)]',
-            )}
-          >
+          <div className={controlCls}>
             {checked && !isDisabled && (
-              <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-bg-brand)]" />
+              <span className="font-body font-normal text-[14px] leading-5 tracking-[0.2px] text-[var(--color-text-inverse)] select-none">
+                ✓
+              </span>
             )}
           </div>
         </div>

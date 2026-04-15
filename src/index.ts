@@ -49,5 +49,11 @@ export type { TabBarProps, TabItem, SidebarProps, SidebarItem, BreadcrumbsProps,
 export { DataTable }    from './components/DataTable'
 export type { DataTableProps, Column } from './components/DataTable'
 
+export { Textarea }     from './components/TextInput/Textarea'
+export type { TextareaProps, TextareaState } from './components/TextInput/Textarea'
+
+export { PortalCTA, BenefitGrid } from './components/Patterns/Patterns'
+export type { PortalCTAProps, PortalCTAButton, BenefitGridProps, BenefitItem } from './components/Patterns/Patterns'
+
 // ── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './utils/cn'
