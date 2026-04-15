@@ -25,7 +25,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "register-webhook": "node scripts/register-figma-webhook.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
