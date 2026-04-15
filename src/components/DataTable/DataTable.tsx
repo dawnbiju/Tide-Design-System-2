@@ -5,6 +5,7 @@ export interface Column<T = Record<string, unknown>> {
   key: keyof T
   label: string
   sortable?: boolean
+  filterable?: boolean
   width?: string
 }
 
@@ -12,6 +13,8 @@ export interface DataTableProps<T = Record<string, unknown>> extends HTMLAttribu
   columns: Column<T>[]
   rows: T[]
   selectable?: boolean
+  /** Allow inline editing — clicking a row switches it to edit mode */
+  editable?: boolean
   loading?: boolean
   emptyMessage?: string
   pageSize?: number
@@ -25,8 +28,9 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
     {
       columns,
       rows,
-      selectable  = false,
-      loading     = false,
+      selectable   = false,
+      editable     = false,
+      loading      = false,
       emptyMessage = 'No data to display.',
       pageSize     = 10,
       onRowClick,
@@ -36,6 +40,9 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
     ref,
   ) => {
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
+    const [editingRow,   setEditingRow]   = useState<number | null>(null)
+    const [filterKey,    setFilterKey]    = useState<string | null>(null)
+    const [filterQuery,  setFilterQuery]  = useState('')
     const [sortKey,  setSortKey]  = useState<string | null>(null)
     const [sortDir,  setSortDir]  = useState<SortDir>(null)
     const [page,     setPage]     = useState(0)
@@ -50,7 +57,11 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
       }
     }
 
-    const sorted = [...rows].sort((a, b) => {
+    const filtered = filterKey && filterQuery
+      ? rows.filter(r => String(r[filterKey] ?? '').toLowerCase().includes(filterQuery.toLowerCase()))
+      : rows
+
+    const sorted = [...filtered].sort((a, b) => {
       if (!sortKey || !sortDir) return 0
       const aVal = String(a[sortKey] ?? '')
       const bVal = String(b[sortKey] ?? '')
@@ -69,27 +80,63 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
     }
 
     const headerCell = (col: Column) => {
-      const isSorted = sortKey === String(col.key)
+      const colKey = String(col.key)
+      const isSorted   = sortKey === colKey
+      const isFiltered = filterKey === colKey && filterQuery !== ''
+      const isActive   = isSorted || isFiltered
+
       return (
         <th
-          key={String(col.key)}
+          key={colKey}
           scope="col"
-          onClick={() => col.sortable && handleSort(String(col.key))}
           style={{ width: col.width }}
           className={cn(
-            'px-4 h-11 text-left font-body font-semibold text-body-s leading-5 tracking-[0.2px] text-[var(--color-text-primary)] bg-[var(--color-bg-subtle)] border-b border-[var(--color-border-subtle)] select-none',
-            col.sortable && 'cursor-pointer hover:text-[var(--color-text-brand)]',
-            isSorted && 'text-[var(--color-text-brand)]',
+            'px-4 h-11 text-left font-body font-semibold text-body-s leading-5 tracking-[0.2px] bg-[var(--color-bg-subtle)] border-b border-[var(--color-border-subtle)] select-none',
+            isActive ? 'text-[var(--color-text-brand)]' : 'text-[var(--color-text-primary)]',
+            (col.sortable || col.filterable) && 'cursor-pointer',
           )}
         >
           <span className="flex items-center gap-1">
-            {col.label}
+            <span
+              className="flex-1"
+              onClick={() => col.sortable && handleSort(colKey)}
+            >
+              {col.label}
+            </span>
             {col.sortable && (
-              <span className="text-[10px] opacity-50">
+              <span
+                className="text-[10px] opacity-50 hover:opacity-100"
+                onClick={() => handleSort(colKey)}
+              >
                 {isSorted && sortDir === 'asc' ? '▲' : isSorted && sortDir === 'desc' ? '▼' : '⇅'}
               </span>
             )}
+            {col.filterable && (
+              <span
+                className={cn('text-[10px] hover:opacity-100', isFiltered ? 'opacity-100' : 'opacity-40')}
+                title="Filter"
+                onClick={() => {
+                  if (filterKey === colKey) {
+                    setFilterKey(null); setFilterQuery('')
+                  } else {
+                    setFilterKey(colKey); setFilterQuery('')
+                  }
+                }}
+              >
+                ⊟
+              </span>
+            )}
           </span>
+          {col.filterable && filterKey === colKey && (
+            <input
+              autoFocus
+              value={filterQuery}
+              onChange={e => setFilterQuery(e.target.value)}
+              onClick={e => e.stopPropagation()}
+              placeholder={`Filter ${col.label}…`}
+              className="mt-1 w-full h-6 px-2 text-[11px] border border-[var(--color-border-subtle)] rounded bg-[var(--color-bg-page)] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-text-brand)]"
+            />
+          )}
         </th>
       )
     }
@@ -126,14 +173,20 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
               <tbody>
                 {paged.map((row, ridx) => {
                   const isSelected = selectedRows.has(ridx)
+                  const isEditing  = editable && editingRow === ridx
                   return (
                     <tr
                       key={ridx}
-                      onClick={() => onRowClick?.(row)}
+                      onClick={() => {
+                        onRowClick?.(row)
+                        if (editable) setEditingRow(isEditing ? null : ridx)
+                      }}
                       className={cn(
                         'border-b border-[var(--color-border-subtle)] last:border-0 h-14 transition-colors',
-                        isSelected ? 'bg-[var(--color-bg-subtle)]' : 'bg-[var(--color-bg-page)] hover:bg-[var(--color-bg-subtle)]/50',
-                        onRowClick && 'cursor-pointer',
+                        isEditing  ? 'bg-[var(--color-bg-subtle)] ring-1 ring-inset ring-[var(--color-text-brand)]' :
+                        isSelected ? 'bg-[var(--color-bg-subtle)]' :
+                                     'bg-[var(--color-bg-page)] hover:bg-[var(--color-bg-subtle)]/50',
+                        (onRowClick || editable) && 'cursor-pointer',
                       )}
                     >
                       {selectable && (
@@ -153,10 +206,19 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
                           key={String(col.key)}
                           className={cn(
                             'px-4 font-body text-body-m leading-6 tracking-[0.25px]',
-                            isSelected ? 'text-[var(--color-text-brand)]' : 'text-[var(--color-text-primary)]',
+                            isSelected || isEditing ? 'text-[var(--color-text-brand)]' : 'text-[var(--color-text-primary)]',
                           )}
                         >
-                          {String(row[col.key] ?? '')}
+                          {isEditing ? (
+                            <input
+                              autoFocus={col.key === columns[0].key}
+                              defaultValue={String(row[col.key] ?? '')}
+                              onClick={e => e.stopPropagation()}
+                              className="w-full h-8 px-2 rounded border border-[var(--color-text-brand)] bg-[var(--color-bg-page)] text-[var(--color-text-primary)] text-body-m outline-none"
+                            />
+                          ) : (
+                            String(row[col.key] ?? '')
+                          )}
                         </td>
                       ))}
                     </tr>

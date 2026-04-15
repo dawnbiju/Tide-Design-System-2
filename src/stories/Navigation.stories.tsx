@@ -17,18 +17,13 @@ const TABS = [
   { id: 'culture',  label: 'Culture' },
 ]
 
+function TabBarDemo() {
+  const [active, setActive] = useState('overview')
+  return <TabBar items={TABS} activeId={active} onTabChange={setActive} className="w-[480px]" />
+}
+
 export const Default: StoryObj<typeof TabBar> = {
-  render: () => {
-    const [active, setActive] = useState('overview')
-    return (
-      <TabBar
-        items={TABS}
-        activeId={active}
-        onTabChange={setActive}
-        className="w-[480px]"
-      />
-    )
-  },
+  render: () => <TabBarDemo />,
 }
 
 /* ── Sidebar ───────────────────────────────────────────── */
@@ -40,19 +35,21 @@ const SIDEBAR_ITEMS = [
   { id: 'settings',   label: 'Settings' },
 ]
 
+function SidebarDemo() {
+  const [active, setActive] = useState('dashboard')
+  return (
+    <Sidebar
+      items={SIDEBAR_ITEMS}
+      activeId={active}
+      onItemClick={setActive}
+      className="w-64 p-2 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)]"
+    />
+  )
+}
+
 export const SidebarStory: StoryObj<typeof Sidebar> = {
   name: 'Sidebar',
-  render: () => {
-    const [active, setActive] = useState('dashboard')
-    return (
-      <Sidebar
-        items={SIDEBAR_ITEMS}
-        activeId={active}
-        onItemClick={setActive}
-        className="w-64 p-2 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)]"
-      />
-    )
-  },
+  render: () => <SidebarDemo />,
 }
 
 /* ── Breadcrumbs ───────────────────────────────────────── */

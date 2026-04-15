@@ -1,4 +1,4 @@
-import { HTMLAttributes, forwardRef } from 'react'
+import { HTMLAttributes, forwardRef, useState } from 'react'
 import { cn } from '@/utils/cn'
 
 /* ── Tab Bar ─────────────────────────────────────────────────────────────────*/
@@ -55,6 +55,7 @@ TabBar.displayName = 'TabBar'
 export interface SidebarItem {
   id: string
   label: string
+  /** Child items — renders this item as expandable with nested children */
   children?: SidebarItem[]
 }
 
@@ -62,6 +63,55 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   items: SidebarItem[]
   activeId?: string
   onItemClick?: (id: string) => void
+}
+
+function SidebarRow({
+  item,
+  activeId,
+  onItemClick,
+  depth = 0,
+}: {
+  item: SidebarItem
+  activeId?: string
+  onItemClick?: (id: string) => void
+  depth?: number
+}) {
+  const isActive = item.id === activeId
+  const isExpandable = (item.children?.length ?? 0) > 0
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          if (isExpandable) setOpen(o => !o)
+          onItemClick?.(item.id)
+        }}
+        className={cn(
+          'flex items-center justify-between h-12 rounded-[var(--radius-16)] font-body font-normal text-body-m leading-6 tracking-[0.25px] text-left transition-colors w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-text-brand)]',
+          depth > 0 ? 'pl-6 pr-4' : 'px-4',
+          isActive
+            ? 'bg-[var(--color-bg-subtle)] text-[var(--color-text-brand)]'
+            : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]',
+        )}
+      >
+        <span>{item.label}</span>
+        {isExpandable && (
+          <span className="text-[var(--color-text-secondary)] text-sm transition-transform duration-150" style={{ transform: open ? 'rotate(90deg)' : 'none' }}>
+            ›
+          </span>
+        )}
+      </button>
+
+      {isExpandable && open && (
+        <div className="flex flex-col gap-1">
+          {item.children!.map(child => (
+            <SidebarRow key={child.id} item={child} activeId={activeId} onItemClick={onItemClick} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </>
+  )
 }
 
 export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
@@ -72,23 +122,9 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       className={cn('flex flex-col gap-1', className)}
       {...props}
     >
-      {items.map(item => {
-        const isActive = item.id === activeId
-        return (
-          <button
-            key={item.id}
-            onClick={() => onItemClick?.(item.id)}
-            className={cn(
-              'flex items-center px-4 h-12 rounded-[var(--radius-16)] font-body font-normal text-body-m leading-6 tracking-[0.25px] text-left transition-colors w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-text-brand)]',
-              isActive
-                ? 'bg-[var(--color-bg-subtle)] text-[var(--color-text-brand)] font-medium'
-                : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]',
-            )}
-          >
-            {item.label}
-          </button>
-        )
-      })}
+      {items.map(item => (
+        <SidebarRow key={item.id} item={item} activeId={activeId} onItemClick={onItemClick} />
+      ))}
     </nav>
   ),
 )
