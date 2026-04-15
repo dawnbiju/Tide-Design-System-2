@@ -1,0 +1,80 @@
+name: Figma Sync
+
+# ─── Triggers ────────────────────────────────────────────────────────────────
+# 1. Scheduled — runs every weekday at 08:00 UTC to detect Figma changes.
+# 2. Manual    — run from the Actions tab with a custom commit message.
+# 3. Webhook   — trigger via `repository_dispatch` from a Figma plugin or
+#                Zapier/Make automation that calls the GitHub API when a
+#                Figma file is published.
+on:
+  schedule:
+    - cron: '0 8 * * 1-5'   # Mon–Fri 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Sync commit message'
+        default: 'chore: sync tokens from Figma'
+        required: false
+  repository_dispatch:
+    types: [figma-publish]
+
+jobs:
+  sync-tokens:
+    name: Pull design tokens from Figma Variables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}   # PAT with repo write permission
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Pull tokens using the Figma REST API ──────────────────────────────
+      # The script reads Figma Variables via GET /v1/files/:key/variables/local
+      # and writes src/tokens/tokens.ts + src/styles/globals.css.
+      - name: Pull Figma tokens
+        env:
+          FIGMA_TOKEN:    ${{ secrets.FIGMA_TOKEN }}
+          FIGMA_FILE_KEY: TrWgWyHmqjNcjSURuXJmnm
+        run: node scripts/sync-figma-tokens.mjs
+
+      # ── Detect changes ────────────────────────────────────────────────────
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet src/tokens/ src/styles/ || echo "changed=true" >> $GITHUB_OUTPUT
+
+      # ── Open a PR with the changes ────────────────────────────────────────
+      - name: Create Pull Request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_PAT }}
+          commit-message: ${{ github.event.inputs.message || 'chore: sync tokens from Figma' }}
+          branch: figma-sync/tokens
+          delete-branch: true
+          title: 'chore: sync design tokens from Figma'
+          body: |
+            ## Automated Figma → GitHub token sync
+
+            This PR was opened automatically by the **Figma Sync** workflow.
+
+            ### What changed
+            Token values in `src/tokens/tokens.ts` and `src/styles/globals.css`
+            were updated to reflect the latest Figma Variables from file
+            [`TrWgWyHmqjNcjSURuXJmnm`](https://www.figma.com/design/TrWgWyHmqjNcjSURuXJmnm).
+
+            ### Review checklist
+            - [ ] Visual diff looks correct in Storybook preview
+            - [ ] No unexpected colour / spacing regressions
+            - [ ] Token names still match the CSS variable references in components
+
+            > Merge this PR to publish the updated tokens to npm.
+          labels: 'tokens,automated'

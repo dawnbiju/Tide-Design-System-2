@@ -1,0 +1,22 @@
+node_modules/
+dist/
+storybook-static/
+.env
+.env.local
+*.local
+
+# Build caches
+.vite/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/settings.json
+
+# Secrets
+*.pem
+npm-cache/
