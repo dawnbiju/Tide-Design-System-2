@@ -114,6 +114,10 @@
   --shadow-modal: 0px 16px 40px 0px rgba(12, 12, 14, 0.16);
 }
 
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ── Base resets ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

@@ -15,6 +15,7 @@ import { Alert, Toast, Banner } from './components/Alert'
 import { TabBar, Sidebar, Breadcrumbs } from './components/Navigation'
 import { DataTable }   from './components/DataTable'
 import { PortalCTA, BenefitGrid } from './components/Patterns/Patterns'
+import { Carousel } from './components/Carousel'
 
 /* ── Section wrapper ─────────────────────────────────────────────────────── */
 function Section({
@@ -344,6 +345,21 @@ export default function App() {
         </Section>
 
         {/* ── Patterns ─────────────────────────────────────────────────── */}
+        {/* ── Carousel ─────────────────────────────────────────────────────── */}
+        <Section title="Carousel">
+          <Carousel
+            heading="Explore features"
+            items={[
+              { title: 'Smart matching',        body: 'AI surfaces the best candidates for every role automatically.',   onClick: () => {} },
+              { title: 'Real-time analytics',   body: 'Track pipeline health and time-to-hire with live dashboards.',    onClick: () => {} },
+              { title: 'Collaborative hiring',  body: 'Invite your team and make decisions together.',                   onClick: () => {} },
+              { title: 'ATS integrations',      body: 'Connect with Greenhouse, Lever, Workday, and more.',              onClick: () => {} },
+              { title: 'Verified candidates',   body: 'Every profile is ID-verified so you spend less time screening.',  onClick: () => {} },
+              { title: 'Compliance built-in',   body: 'GDPR, DPDP, and EEO-compliant flows out of the box.',            onClick: () => {} },
+            ]}
+          />
+        </Section>
+
         <Section title="Patterns — PortalCTA" cols={2}>
           <PortalCTA
             eyebrow="For employers"

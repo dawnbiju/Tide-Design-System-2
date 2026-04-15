@@ -55,5 +55,8 @@ export type { TextareaProps, TextareaState } from './components/TextInput/Textar
 export { PortalCTA, BenefitGrid } from './components/Patterns/Patterns'
 export type { PortalCTAProps, PortalCTAButton, BenefitGridProps, BenefitItem } from './components/Patterns/Patterns'
 
+export { Carousel, CarouselCard } from './components/Carousel'
+export type { CarouselProps, CarouselCardProps } from './components/Carousel'
+
 // ── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './utils/cn'
