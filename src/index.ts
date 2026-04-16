@@ -58,5 +58,8 @@ export type { PortalCTAProps, PortalCTAButton, BenefitGridProps, BenefitItem } f
 export { Carousel, CarouselCard } from './components/Carousel'
 export type { CarouselProps, CarouselCardProps } from './components/Carousel'
 
+export { Stepper } from './components/Stepper'
+export type { StepperProps, StepItem } from './components/Stepper'
+
 // ── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './utils/cn'
